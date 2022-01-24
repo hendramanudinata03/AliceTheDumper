@@ -1,0 +1,43 @@
+# AliceTheDumper GitHub Actions Configuration
+
+name: "AliceTheDumper's Work"
+ 
+on:
+  workflow_dispatch:
+    inputs:
+      FW_URL:
+        description: 'Android Firmware URL'
+        required: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+
+    steps:
+       - name: Clone Phoenix Firmware Dumper
+         run: |
+              git clone https://github.com/DroidDumps/phoenix_firmware_dumper
+
+       - name: Setup Environment
+         working-directory: phoenix_firmware_dumper
+         run: |
+              sudo ./setup.sh
+
+       - name: Setup Git-related & Dumper configurations
+         working-directory: phoenix_firmware_dumper
+         run: |
+              git config --global user.name "Hendra Manudinata"
+              git config --global user.email "hendra@manudinata.me"
+              echo "${{ secrets.GIT_TOKEN }}" > .github_token
+              echo "${{ secrets.GIT_ORG_NAME }}" > .github_orgname
+              echo "${{ secrets.BOT_TOKEN }}" > .tg_token
+              echo "${{ secrets.CHAT_ID }}" > .tg_chat
+
+       - name: Start the dumping
+         working-directory: phoenix_firmware_dumper
+         run: |
+              ./dumper.sh "${{ github.event.inputs.FW_URL }}"
